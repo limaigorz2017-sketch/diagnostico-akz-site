@@ -562,6 +562,15 @@
       text-align: center;
     }
 
+    .akz-hidden-security {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
     @media (max-width: 920px) {
       .hero {
         grid-template-columns: 1fr;
@@ -706,6 +715,13 @@
         </div>
 
         <form id="akzForm">
+          <div class="akz-hidden-security" aria-hidden="true">
+            <label for="empresa_site">Empresa site</label>
+            <input id="empresa_site" name="empresa_site" tabindex="-1" autocomplete="off">
+            <input id="form_started_at" name="form_started_at" type="hidden">
+            <input id="submission_id" name="submission_id" type="hidden">
+            <input id="source_page" name="source_page" type="hidden">
+          </div>
           <section class="section active" data-title="Identificacao do negocio" data-description="Comece pelos dados basicos para personalizar o diagnostico.">
             <div class="grid">
               <div class="field">
@@ -994,14 +1010,14 @@
 
           <div class="result" id="resultBox" role="status" aria-live="polite">
             <h3>Diagnostico recebido.</h3>
-            <p>Esta versao de demonstracao calcula uma previa interna. Na proxima etapa, conectaremos o envio para planilha, pagamento e entrega automatica.</p>
+            <p>Suas respostas foram enviadas para a Akaizen. O diagnostico sera processado e enviado para o e-mail informado.</p>
             <div class="mini-score">
               <div class="score-number" id="previewScore">0</div>
               <ul class="score-list" id="previewList"></ul>
             </div>
           </div>
 
-          <p class="privacy">Suas respostas serao usadas para gerar o diagnostico e podem alimentar estudos internos de mercado sem exposicao de dados sensiveis.</p>
+          <p class="privacy">Suas respostas serao usadas para gerar o diagnostico. Dados pessoais nao devem ser publicados e podem ser separados de analises internas anonimas.</p>
         </form>
       </article>
     </section>
@@ -1022,7 +1038,14 @@
     const resultBox = document.getElementById("resultBox");
     const previewScore = document.getElementById("previewScore");
     const previewList = document.getElementById("previewList");
+    const formStartedAt = document.getElementById("form_started_at");
+    const submissionId = document.getElementById("submission_id");
+    const sourcePage = document.getElementById("source_page");
     let current = 0;
+
+    formStartedAt.value = String(Date.now());
+    submissionId.value = (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    sourcePage.value = window.location.href;
 
     function updateRangeLabels() {
       document.querySelectorAll('.scale').forEach((scale) => {
