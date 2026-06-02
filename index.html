@@ -1008,6 +1008,7 @@
   </main>
 
   <script>
+    const AKZ_ENDPOINT = "https://script.google.com/macros/s/AKfycbwvsTlgMgCz4iT4IVpjiMB4g7op50llVHP_oUQmTi4As6dAAclbhg25DZuIRrmpl5Fq/exec";
     const sections = Array.from(document.querySelectorAll(".section"));
     const tabs = Array.from(document.querySelectorAll(".step-tab"));
     const sectionKicker = document.getElementById("sectionKicker");
@@ -1081,7 +1082,33 @@
       return Number(document.querySelector(`[name="${name}"]`)?.value || 0) * 2;
     }
 
-    function calculatePreview() {
+    function collectFormData() {
+      const formData = new FormData(document.getElementById("akzForm"));
+      const data = {};
+      for (const [key, value] of formData.entries()) {
+        if (data[key]) {
+          data[key] = Array.isArray(data[key]) ? [...data[key], value] : [data[key], value];
+        } else {
+          data[key] = value;
+        }
+      }
+      document.querySelectorAll('input[type="range"]').forEach((input) => {
+        data[input.name] = input.value;
+      });
+      return data;
+    }
+
+    async function sendToDatabase(payload) {
+      if (!AKZ_ENDPOINT) return { ok: false, skipped: true };
+      await fetch(AKZ_ENDPOINT, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload)
+      });
+      return { ok: true };
+    }
+
+    async function calculatePreview() {
       const scores = [
         (rangeScore("instagram_claro") + rangeScore("bio_clara")) / 2,
         (rangeScore("instagram_claro") + rangeScore("bio_clara") + rangeScore("destaques")) / 3,
@@ -1107,6 +1134,11 @@
 
       previewList.innerHTML = insights.slice(0, 4).map((item) => `<li>${item}</li>`).join("");
       resultBox.classList.add("visible");
+
+      const payload = collectFormData();
+      payload.score_preview = finalScore;
+      payload.preview_insights = insights.slice(0, 4);
+      await sendToDatabase(payload);
     }
 
     document.querySelectorAll('input[type="range"]').forEach((input) => {
@@ -1132,4 +1164,5 @@
   </script>
 </body>
 </html>
+
 
